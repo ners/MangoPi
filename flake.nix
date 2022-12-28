@@ -2,26 +2,28 @@
   inputs.nixpkgs.url = github:nixos/nixpkgs/nixos-22.11;
   inputs.flake-utils.url = github:numtide/flake-utils;
 
-  outputs = inputs:
+  outputs = inputs: inputs.flake-utils.lib.eachDefaultSystem (hostSystem:
     let
-      targetSystem = "riscv64-linux";
       pkgsFor = sys: inputs.nixpkgs.legacyPackages.${sys};
+      hostPkgs = pkgsFor hostSystem;
+      targetSystem = "riscv64-linux";
       targetPkgs = pkgsFor targetSystem;
+      inherit (inputs.nixpkgs) lib;
     in
     {
-      nixosConfigurations.mangoPi = inputs.nixpkgs.lib.nixosSystem {
+      nixosConfigurations.MangoPi = lib.nixosSystem {
         system = targetSystem;
-        modules = [ ./mangoPi.nix ];
+        modules = [
+          ./mangoPi.nix
+        ];
       };
-    } // inputs.flake-utils.lib.eachDefaultSystem (hostSystem:
-      let
-        pkgs = pkgsFor hostSystem;
-      in
-      {
-        devShells.default = pkgs.mkShell { };
 
-        packages.toplevel = inputs.self.nixosConfigurations.mangoPi.config.system.build.toplevel;
-        packages.sdImage = inputs.self.nixosConfigurations.mangoPi.config.system.build.sdImage;
-      }
-    );
+      devShells.default = hostPkgs.mkShell { };
+
+      packages = rec {
+        inherit (inputs.self.nixosConfigurations.${hostSystem}.MangoPi.config.system.build) sdImage toplevel;
+        default = sdImage;
+      };
+    }
+  );
 }

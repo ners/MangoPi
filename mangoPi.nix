@@ -2,23 +2,18 @@
 
 {
   imports = [
-    "${modulesPath}/installer/sd-card/sd-image.nix"
+    "${modulesPath}/installer/sd-card/sd-image-riscv64-qemu.nix"
   ];
 
+  sdImage.imageBaseName = "MangoPi";
   system.stateVersion = lib.trivial.version;
 
   boot = {
-    # Disable Grub, we're using uboot
-    loader.grub.enable = false;
-    loader.generic-extlinux-compatible.enable = true;
-
-    #initrd.availableKernelModules = lib.mkForce [ ];
-
     kernelPackages = lib.mkForce pkgs.linuxPackages_latest;
-
-    #extraModulePackages = [ ];
-
-    # Exclude zfs
     supportedFilesystems = lib.mkForce [ ];
   };
+
+  users.users.root.openssh.authorizedKeys.keys = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINBlAx5Hi5TsLsy5e+4OdBmM4oHtdUnqX5gtNbfc60rq ners <ners@gmx.ch>"
+  ];
 }
