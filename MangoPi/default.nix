@@ -8,6 +8,16 @@
   sdImage.imageBaseName = "MangoPi";
   system.stateVersion = lib.trivial.version;
 
+  hardware.deviceTree.enable = true;
+  hardware.deviceTree.overlays =
+    let
+      dtsdir = ./linux/arch/riscv/boot/dts/allwinner;
+      mkdts = name: { inherit name; dtsFile = "${dtsdir}/${name}.dts"; };
+    in
+    [
+      (mkdts "sun20i-d1-mangopi-mq-pro")
+    ];
+
   boot = {
     kernelPackages = lib.mkForce pkgs.linuxPackages_latest;
     supportedFilesystems = lib.mkForce [ ];
