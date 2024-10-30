@@ -21,6 +21,7 @@
   boot = {
     kernelPackages = lib.mkForce pkgs.linuxPackages_latest;
     supportedFilesystems = lib.mkForce [ ];
+    kernelParams = [ "console=ttyS0,115200n8" "console=tty0" "earlycon=sbi" ];
   };
 
   users.users.root.openssh.authorizedKeys.keys = [
